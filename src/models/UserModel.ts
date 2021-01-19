@@ -22,13 +22,13 @@ const UserSchema = new Schema({
         required: true,
         type: String
     },
-    confirmed: {
-        type: Boolean
-    },
-    confirmed_hash: {
-        required: true,
-        type: String
-    },
+    // confirmed: {
+    //     type: Boolean
+    // },
+    // confirmed_hash: {
+    //     required: true,
+    //     type: String
+    // },
     about: {
         type: String
     },

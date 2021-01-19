@@ -5,7 +5,7 @@ mongoose.connect(`mongodb+srv://userface:${process.env.DB_PASSWORD}@cluster0.cdz
     useCreateIndex: true,
     useUnifiedTopology: true,
     useFindAndModify: false
-}).then(r => console.log(`connected to MongoDB: ${r}`))
+}).then(r => console.log('connected to MongoDB'))
 
 const db = mongoose.connection
 
