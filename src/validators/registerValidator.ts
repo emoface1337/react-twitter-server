@@ -29,7 +29,7 @@ export const registerValidator = [
         }).withMessage('Пароль слишком короткий')
         .custom((value, { req }) => {
             if (value !== req.body.password2) {
-                throw new Error('Пароль не совпадают')
+                throw new Error('Пароли не совпадают')
             } else {
                 return value
             }

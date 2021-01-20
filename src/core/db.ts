@@ -1,6 +1,6 @@
 import mongoose from 'mongoose'
 
-mongoose.connect(`mongodb+srv://userface:${process.env.DB_PASSWORD}@cluster0.cdzyo.mongodb.net/${process.env.DB_NANE}>?retryWrites=true&w=majority`, {
+mongoose.connect(`mongodb+srv://userface:${process.env.DB_PASSWORD}@cluster0.cdzyo.mongodb.net/${process.env.DB_NANE}?retryWrites=true&w=majority`, {
     useNewUrlParser: true,
     useCreateIndex: true,
     useUnifiedTopology: true,
