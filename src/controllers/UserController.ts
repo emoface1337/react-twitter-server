@@ -3,10 +3,11 @@ import { UserModel, UserModelDocumentType, UserModelType } from '../models/UserM
 import { validationResult } from 'express-validator'
 import { generateMD5 } from '../utils/hashGenerator'
 import { sendMail } from '../utils/sendMail'
+import mongoose from 'mongoose'
 
 class UserControllerClass {
 
-    async index(_: any, res: express.Response): Promise<void> {
+    async getAllUsers(_: any, res: express.Response): Promise<void> {
         try {
             const users = await UserModel.find({}).exec()
             res.json({
@@ -21,7 +22,42 @@ class UserControllerClass {
         }
     }
 
-    async create(req: express.Request, res: express.Response): Promise<void> {
+    async getUser(req: express.Request, res: express.Response): Promise<void> {
+        try {
+
+            const userId = req.params.id
+
+            if (!mongoose.Types.ObjectId.isValid(userId)) {
+                res.status(400).send()
+                return
+            }
+
+            await UserModel.findById(userId, (error: Error | null, user: UserModelDocumentType) => {
+
+                if (!user) {
+                    res.status(404).send('Пользователь не найден.')
+                    return
+                } else if (error) {
+                    res.status(500).send()
+                    return
+                } else {
+                    res.json({
+                        status: 'success',
+                        data: user
+                    })
+                }
+            }).select()
+
+        } catch (e) {
+            res.status(500).json({
+                status: 'error',
+                message: e
+            })
+        }
+    }
+
+
+    async createNewUser(req: express.Request, res: express.Response): Promise<void> {
         try {
             const errors = validationResult(req)
 
@@ -37,8 +73,9 @@ class UserControllerClass {
                 email: req.body.email,
                 fullname: req.body.fullname,
                 username: req.body.username,
-                password: req.body.password,
-                confirmHash: generateMD5(process.env.SECRET_KEY || Math.random().toString())
+                password: generateMD5(req.body.password + process.env.SECRET_KEY),
+                confirmHash: generateMD5(req.body.email + process.env.SECRET_KEY || Math.random().toString()),
+                confirmed: false
             }
 
             const user = await UserModel.findOne({ email: data.email }).exec()
@@ -70,16 +107,17 @@ class UserControllerClass {
             `
                         },
                         (error: Error | null) => {
-                            if (error)
+                            if (error) {
                                 res.status(500).json({
                                     status: 'error',
                                     message: error
                                 })
-                            else
+                            } else {
                                 res.status(201).json({
                                     status: 'success',
                                     data: result
                                 })
+                            }
                         })
                 }
             })
@@ -91,12 +129,12 @@ class UserControllerClass {
         }
     }
 
-    async verify(req: express.Request, res: express.Response): Promise<void> {
+    async verifyUser(req: express.Request, res: express.Response): Promise<void> {
         try {
             const hash = req.query.hash
 
             if (!hash) {
-                res.status(400).send()
+                res.status(400).send('Не указан идентификатор подтверждения.')
                 return
             }
 
@@ -104,8 +142,7 @@ class UserControllerClass {
                 if (!user) {
                     res.status(400).send('Пользователь не найден.')
                     return
-                }
-                else if (error) {
+                } else if (error) {
                     res.status(400).send('Произошла ошибка.')
                     return
                 } else {

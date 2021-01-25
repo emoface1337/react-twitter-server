@@ -34,14 +34,16 @@ const UserSchema = new Schema<UserModelDocumentType>({
         },
         password: {
             required: true,
-            type: String
+            type: String,
+            // select: false
         },
         confirmed: {
             type: Boolean
         },
         confirmHash: {
             required: true,
-            type: String
+            type: String,
+            // select: false
         },
         about: {
             type: String
@@ -54,5 +56,13 @@ const UserSchema = new Schema<UserModelDocumentType>({
         versionKey: false
     }
 )
+
+UserSchema.set('toJSON', {
+    transform: function (_: any, ret: any) {
+        delete ret.password
+        delete ret.confirmHash
+        return ret
+    }
+})
 
 export const UserModel = model<UserModelDocumentType>('User', UserSchema)

@@ -15,9 +15,10 @@ const port = process.env.PORT || 6666
 app.use(cors())
 app.use(express.json())
 
-app.get('/users', UserController.index)
-app.post('/users', registerValidator, UserController.create)
-app.get('/users/verify', UserController.verify)
+app.get('/users', UserController.getAllUsers)
+app.get('/users/verify', UserController.verifyUser)
+app.get('/users/:id', UserController.getUser)
+app.post('/users', registerValidator, UserController.createNewUser)
 
 app.listen(port, (): void => {
     return console.log(`server is listening on ${port}`)
