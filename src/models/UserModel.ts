@@ -1,6 +1,7 @@
 import { model, Schema, Document } from 'mongoose'
 
 export type UserModelType = {
+    _id?: string
     email: string,
     fullname: string,
     username: string,
@@ -34,7 +35,7 @@ const UserSchema = new Schema<UserModelDocumentType>({
         },
         password: {
             required: true,
-            type: String,
+            type: String
             // select: false
         },
         confirmed: {
@@ -42,7 +43,7 @@ const UserSchema = new Schema<UserModelDocumentType>({
         },
         confirmHash: {
             required: true,
-            type: String,
+            type: String
             // select: false
         },
         about: {

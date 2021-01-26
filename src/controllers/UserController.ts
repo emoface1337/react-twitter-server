@@ -1,6 +1,7 @@
 import express from 'express'
+import jwt from 'jsonwebtoken'
 import { UserModel, UserModelDocumentType, UserModelType } from '../models/UserModel'
-import { validationResult } from 'express-validator'
+import { body, validationResult } from 'express-validator'
 import { generateMD5 } from '../utils/hashGenerator'
 import { sendMail } from '../utils/sendMail'
 import mongoose from 'mongoose'
@@ -56,7 +57,6 @@ class UserControllerClass {
         }
     }
 
-
     async createNewUser(req: express.Request, res: express.Response): Promise<void> {
         try {
             const errors = validationResult(req)
@@ -102,7 +102,7 @@ class UserControllerClass {
                             subject: 'Подтверждение почты',
                             html: `
                                     <div style="padding: 15px 15px">
-                                        Чтобы подтвердить, перейдите <a href="http://localhost:${process.env.PORT || 6666}/users/verify?hash=${data.confirmHash}">по этой ссылке</a>
+                                        Чтобы подтвердить, перейдите <a href="http://localhost:${process.env.PORT || 6666}/auth/verify?hash=${data.confirmHash}">по этой ссылке</a>
                                     </div>
             `
                         },
@@ -160,6 +160,41 @@ class UserControllerClass {
             res.status(500).json({
                 status: 'error',
                 message: JSON.stringify(e)
+            })
+        }
+    }
+
+    async afterLogin(req: express.Request, res: express.Response) {
+        try {
+
+            const user = req.user ? (req.user as UserModelDocumentType).toJSON() : undefined
+
+            res.json({
+                status: 'success',
+                data: {
+                    ...user,
+                    token: jwt.sign({ data: req.user }, process.env.SECRET_KEY || 'twitter', { expiresIn: '14 days' })
+                }
+            })
+        } catch (e) {
+            res.status(500).json({
+                status: 'error',
+                message: e
+            })
+        }
+    }
+
+    async isAuthorized(req: express.Request, res: express.Response) {
+        try {
+            const user = req.user ? (req.user as UserModelDocumentType).toJSON() : undefined
+            res.json({
+                status: 'success',
+                data: user
+            })
+        } catch (e) {
+            res.status(500).json({
+                status: 'error',
+                message: e
             })
         }
     }
