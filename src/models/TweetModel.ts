@@ -21,7 +21,8 @@ const TweetSchema = new Schema<TweetModelDocumentType>({
         }
     },
     {
-        versionKey: false
+        versionKey: false,
+        timestamps: true
     }
 )
 

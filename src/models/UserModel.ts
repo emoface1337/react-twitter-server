@@ -54,7 +54,8 @@ const UserSchema = new Schema<UserModelDocumentType>({
         }
     },
     {
-        versionKey: false
+        versionKey: false,
+        timestamps: true
     }
 )
 

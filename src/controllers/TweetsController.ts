@@ -134,6 +134,51 @@ class TweetsControllerClass {
             })
         }
     }
+
+    async updateTweet(req: express.Request, res: express.Response): Promise<void> {
+
+        try {
+
+            const user = req.user as UserModelType
+
+            if (user) {
+
+                const tweetId: string = req.params.id
+
+                if (!mongoose.Types.ObjectId.isValid(tweetId)) {
+                    res.status(400).send()
+                    return
+                }
+
+                const tweet: TweetModelDocumentType = await TweetModel.findById(tweetId).exec()
+
+                if (tweet) {
+
+                    if (tweet.user?.toString() !== user._id?.toString()) {
+                        res.status(400).send('Нет прав для удаление данного твита.')
+                        return
+                    }
+                    console.log(req.body.text)
+                    tweet.text = req.body.text
+                    await tweet.save()
+
+                    res.json({
+                        status: 'success'
+                    })
+                } else {
+                    res.status(404).send()
+                    return
+                }
+            }
+        } catch
+            (e) {
+            res.status(500).json({
+                status: 'error',
+                message: e
+            })
+        }
+    }
+
 }
 
 export const TweetsController = new TweetsControllerClass()

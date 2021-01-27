@@ -35,6 +35,7 @@ app.get('/tweets', TweetsController.getAllTweets)
 app.get('/tweets/:id', TweetsController.getTweet)
 app.post('/tweets', passport.authenticate('jwt'), createTweetValidator, TweetsController.createNewTweet)
 app.delete('/tweets/:id', passport.authenticate('jwt'), TweetsController.deleteTweet)
+app.patch('/tweets/:id', passport.authenticate('jwt'), TweetsController.updateTweet)
 
 app.listen(port, (): void => {
     return console.log(`server is listening on ${port}`)
