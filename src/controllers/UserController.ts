@@ -1,10 +1,11 @@
 import express from 'express'
 import jwt from 'jsonwebtoken'
+import mongoose from 'mongoose'
+
 import { UserModel, UserModelDocumentType, UserModelType } from '../models/UserModel'
-import { body, validationResult } from 'express-validator'
+import { validationResult } from 'express-validator'
 import { generateMD5 } from '../utils/hashGenerator'
 import { sendMail } from '../utils/sendMail'
-import mongoose from 'mongoose'
 
 class UserControllerClass {
 
@@ -47,7 +48,7 @@ class UserControllerClass {
                         data: user
                     })
                 }
-            }).select()
+            })
 
         } catch (e) {
             res.status(500).json({

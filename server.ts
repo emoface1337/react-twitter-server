@@ -1,10 +1,13 @@
 import express from 'express'
 import dotenv from 'dotenv'
+
 dotenv.config()
 
 import { UserController } from './src/controllers/UserController'
 import { registerValidator } from './src/validators/registerValidator'
 import { passport } from './src/core/passport'
+import { TweetsController } from './src/controllers/TweetsController'
+import { createTweetValidator } from './src/validators/createTweetValidator'
 
 require('./src/core/db')
 
@@ -26,6 +29,12 @@ app.post('/auth/signin', passport.authenticate('local'), UserController.afterLog
 // users
 app.get('/users', UserController.getAllUsers)
 app.get('/users/:id', UserController.getUser)
+
+// tweets
+app.get('/tweets', TweetsController.getAllTweets)
+app.get('/tweets/:id', TweetsController.getTweet)
+app.post('/tweets', passport.authenticate('jwt'), createTweetValidator, TweetsController.createNewTweet)
+app.delete('/tweets/:id', passport.authenticate('jwt'), TweetsController.deleteTweet)
 
 app.listen(port, (): void => {
     return console.log(`server is listening on ${port}`)
