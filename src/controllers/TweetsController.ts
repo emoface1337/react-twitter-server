@@ -1,7 +1,7 @@
 import express from 'express'
 import mongoose from 'mongoose'
-
 import { validationResult } from 'express-validator'
+
 import { TweetModel, TweetModelDocumentType, TweetModelType } from '../models/TweetModel'
 import { UserModelType } from '../models/UserModel'
 
@@ -9,7 +9,7 @@ class TweetsControllerClass {
 
     async getAllTweets(_: any, res: express.Response): Promise<void> {
         try {
-            const tweets = await TweetModel.find({}).exec()
+            const tweets = await TweetModel.find({}).populate('user').sort({ 'createdAt': '-1' }).exec()
             res.json({
                 status: 'success',
                 data: tweets
@@ -32,7 +32,7 @@ class TweetsControllerClass {
                 return
             }
 
-            await TweetModel.findById(tweetId, (error: Error | null, tweet: TweetModelDocumentType) => {
+            await TweetModel.findById(tweetId, async (error: Error | null, tweet: TweetModelDocumentType) => {
 
                 if (!tweet) {
                     res.status(404).send('Такого твина не существует.')
@@ -43,7 +43,7 @@ class TweetsControllerClass {
                 } else {
                     res.json({
                         status: 'success',
-                        data: tweet
+                        data: await tweet.populate('user').execPopulate()
                     })
                 }
             })
@@ -82,7 +82,7 @@ class TweetsControllerClass {
 
                 res.json({
                     status: 'success',
-                    data: tweet
+                    data: await tweet.populate('user').execPopulate()
                 })
             }
         } catch (e) {
@@ -158,12 +158,13 @@ class TweetsControllerClass {
                         res.status(400).send('Нет прав для удаление данного твита.')
                         return
                     }
-                    console.log(req.body.text)
+
                     tweet.text = req.body.text
                     await tweet.save()
 
                     res.json({
-                        status: 'success'
+                        status: 'success',
+                        data: tweet
                     })
                 } else {
                     res.status(404).send()
