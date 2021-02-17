@@ -6,6 +6,7 @@ import { validationResult } from 'express-validator'
 import { UserModel, UserModelDocumentType, UserModelType } from '../models/UserModel'
 import { generateMD5 } from '../utils/hashGenerator'
 import { sendMail } from '../utils/sendMail'
+import { passport } from '../core/passport'
 
 class UserControllerClass {
 
@@ -23,6 +24,25 @@ class UserControllerClass {
             })
         }
     }
+
+    async getRecommendedUsers(_: any, res: express.Response): Promise<void> {
+        try {
+
+            const users = await UserModel.aggregate([{ $sample: { size: 3 } }])
+            res.json({
+                status: 'success',
+                data: {
+                    users
+                }
+            })
+        } catch (e) {
+            res.json({
+                status: 'error',
+                message: JSON.stringify(e)
+            })
+        }
+    }
+
 
     async getUser(req: express.Request, res: express.Response): Promise<void> {
         try {
@@ -45,7 +65,9 @@ class UserControllerClass {
                 } else {
                     res.json({
                         status: 'success',
-                        data: user
+                        data: {
+                            user
+                        }
                     })
                 }
             })
@@ -165,39 +187,49 @@ class UserControllerClass {
         }
     }
 
-    async afterLogin(req: express.Request, res: express.Response) {
-        try {
+    async signIn(req: express.Request, res: express.Response, next: any) {
 
-            const user = req.user ? (req.user as UserModelDocumentType).toJSON() : undefined
+        passport.authenticate('local', (err, user, info) => {
 
-            res.json({
-                status: 'success',
-                data: {
-                    ...user,
-                    token: jwt.sign({ data: req.user }, process.env.SECRET_KEY || 'twitter', { expiresIn: '14 days' })
-                }
+            if (err) {
+                return next(err)
+            }
+            if (!user) {
+                return res.status(401).send({ status: 'error', message: info.message })
+            }
+
+            req.logIn(user, () => {
+                res.send({
+                    status: 'success',
+                    data: {
+                        user,
+                        token: jwt.sign({ data: req.user }, process.env.SECRET_KEY || 'twitter', { expiresIn: '14 days' })
+                    }
+                })
             })
-        } catch (e) {
-            res.status(500).json({
-                status: 'error',
-                message: e
-            })
-        }
+        })(req, res, next)
     }
 
-    async isAuthorized(req: express.Request, res: express.Response) {
-        try {
-            const user = req.user ? (req.user as UserModelDocumentType).toJSON() : undefined
-            res.json({
-                status: 'success',
-                data: user
+    async isAuthorized(req: express.Request, res: express.Response, next: any) {
+
+        passport.authenticate('jwt', { session: false }, (err, user, info) => {
+
+            if (err) {
+                return next(err)
+            }
+            if (!user) {
+                return res.status(401).send({ status: 'error' })
+            }
+
+            req.logIn(user, () => {
+                res.send({
+                    status: 'success',
+                    data: {
+                        user
+                    }
+                })
             })
-        } catch (e) {
-            res.status(500).json({
-                status: 'error',
-                message: e
-            })
-        }
+        })(req, res, next)
     }
 }
 

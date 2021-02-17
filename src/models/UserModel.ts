@@ -51,6 +51,9 @@ const UserSchema = new Schema<UserModelDocumentType>({
         },
         website: {
             type: String
+        },
+        avatarUrl: {
+            type: String
         }
     },
     {

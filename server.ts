@@ -22,12 +22,13 @@ app.use(passport.initialize())
 
 // auth
 app.get('/auth/verify', UserController.verifyUser)
-app.get('/auth/me', passport.authenticate('jwt', { session: false }), UserController.isAuthorized)
+app.get('/auth/me', UserController.isAuthorized)
 app.post('/auth/signup', registerValidator, UserController.createNewUser)
-app.post('/auth/signin', passport.authenticate('local'), UserController.afterLogin)
+app.post('/auth/signin', UserController.signIn)
 
 // users
 app.get('/users', UserController.getAllUsers)
+app.get('/users/recommended', UserController.getRecommendedUsers)
 app.get('/users/:id', UserController.getUser)
 
 // tweets
@@ -36,6 +37,12 @@ app.get('/tweets/:id', TweetsController.getTweet)
 app.post('/tweets', passport.authenticate('jwt'), createTweetValidator, TweetsController.createNewTweet)
 app.delete('/tweets/:id', passport.authenticate('jwt'), TweetsController.deleteTweet)
 app.patch('/tweets/:id', passport.authenticate('jwt'), TweetsController.updateTweet)
+
+// themes
+
+
+// recommended users
+
 
 app.listen(port, (): void => {
     return console.log(`server is listening on ${port}`)

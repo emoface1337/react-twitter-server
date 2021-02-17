@@ -35,7 +35,7 @@ class TweetsControllerClass {
             await TweetModel.findById(tweetId, async (error: Error | null, tweet: TweetModelDocumentType) => {
 
                 if (!tweet) {
-                    res.status(404).send('Такого твина не существует.')
+                    res.status(404).send('Такого твита не существует.')
                     return
                 } else if (error) {
                     res.status(500).send()

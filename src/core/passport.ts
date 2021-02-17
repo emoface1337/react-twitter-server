@@ -13,10 +13,13 @@ passport.use(new LocalStrategy(
                 return done(err)
             }
             if (!user) {
-                return done(null, false, { message: 'Неверное имя пользователя.' })
+                return done(null, false, { message: 'Неверный логин или пароль.' })
+            }
+            if (!user.confirmed) {
+                return done(null, false, { message: 'Пользователь не подтверждён.' })
             }
             if (user.password !== generateMD5(password + process.env.SECRET_KEY)) {
-                return done(null, false, { message: 'Неверный пароль.' })
+                return done(null, false, { message: 'Неверный логин или пароль.' })
             }
             done(null, user)
         })
@@ -30,16 +33,15 @@ passport.use(
             jwtFromRequest: ExtractJWT.fromHeader('token')
         },
         async (payload: { data: UserModelType }, done) => {
-            try {
-                UserModel.findById(payload.data._id, (error: Error | null, user: UserModelDocumentType) => {
-                    if (user)
-                        return done(null, user)
-                    done(null, false)
-                })
-
-            } catch (error) {
-                done(error, false)
-            }
+            UserModel.findById(payload.data._id, (err: Error | null, user: UserModelDocumentType) => {
+                if (err) {
+                    return done(err)
+                }
+                if (!user) {
+                    return done(null, false, { message: 'Неверный логин или пароль.' })
+                }
+                done(null, user)
+            })
         }
     )
 )
